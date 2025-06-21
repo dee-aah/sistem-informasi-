@@ -1,0 +1,30 @@
+body {
+    overflow-x: hidden;
+    overflow-y: scroll;
+    background-color: #f1f3f5; }
+.sidebarmenu .nav-link {
+    color: #1b1c1f;
+    font-weight: 500;
+    }
+.sidebarmenu .nav-link:hover {
+    background-color: #e0e7ff;
+    border-radius: 6px;
+    }
+.dashboard-box {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    height: 100%;
+    }
+*{
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif ;
+    }
+.title-blue {
+    color: #003366;
+    font-size: 50px; /* biru tua seperti sidebar */
+    }
+.i{
+    color: rgb(41, 41, 227);
+    text:blue;
+}
