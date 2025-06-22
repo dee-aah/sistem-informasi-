@@ -39,8 +39,8 @@ if ($cari != '') {
         <nav class="nav flex-column text-dark mt-4">
         <a href="dashboard.php" class="nav-link"><i class="bi bi-house-fill me-2"></i>Beranda</a>
         <a href="anggota.php" class="nav-link"><i class="bi bi-people-fill me-2"></i>Data Anggota</a>
-        <a href="kegiatan.php" class="nav-link i"><i class="bi bi-calendar-event-fill me-2"></i>Kegiatan</a>
-        <a href="#" class="nav-link"><i class="bi bi-cash-stack me-2"></i>Keuangan</a>
+        <a href="kegiatan.php" class="nav-link text-primary"><i class="bi bi-calendar-event-fill me-2"></i>Kegiatan</a>
+        <a href="keuangan.php" class="nav-link"><i class="bi bi-cash-stack me-2"></i>Keuangan</a>
         <a href="#" class="nav-link"><i class="bi bi-file-earmark-text-fill me-2"></i>Laporan Bulanan</a>
         </nav>
         </div>

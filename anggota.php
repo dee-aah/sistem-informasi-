@@ -37,20 +37,20 @@ if ($cari != '') {
     </nav>
 </header>
 <main>
-  <div class="container-fluid" style="margin-top: 60px;" > 
+  <div class="container-fluid" style="margin-top: 55px;" > 
     <div class="row ">
       <div class="col-2 border-end sidebarmenu  ">
         <div class="position-fixed ">           
           <nav class="nav flex-column text-dark mt-4">
           <a href="dashboard.php" class="nav-link"><i class="bi bi-house-fill me-2"></i>Beranda</a>
-          <a href="anggota.php" class="nav-link i"><i class="bi bi-people-fill me-2"></i>Data Anggota</a>
+          <a href="anggota.php" class="nav-link text-primary"><i class="bi bi-people-fill me-2"></i>Data Anggota</a>
           <a href="kegiatan.php" class="nav-link"><i class="bi bi-calendar-event-fill me-2"></i>Kegiatan</a>
-          <a href="#" class="nav-link"><i class="bi bi-cash-stack me-2"></i>Keuangan</a>
+          <a href="keuangan.php" class="nav-link"><i class="bi bi-cash-stack me-2"></i>Keuangan</a>
           <a href="#" class="nav-link"><i class="bi bi-file-earmark-text-fill me-2"></i>Laporan Bulanan</a>
           </nav>
         </div>
       </div>
-      <div class=" col-10 " style="margin-top: 60px;" >
+      <div class=" col-10 bg-light " style="padding-top: 60px;" >
         <div class="d-flex justify-content-between align-items-center mb-3">
             <p class="mb-0">Jumlah Anggota : <strong><?=$totalAnggota?> Orang</strong></p>
           <div class="d-flex row">

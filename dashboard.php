@@ -5,10 +5,17 @@ $query = mysqli_query($conn, "SELECT COUNT(*) AS total FROM anggota");
 $data = mysqli_fetch_assoc($query);
 $totalAnggota = $data['total'];
 //saldo
-$query = mysqli_query($conn, "SELECT SUM(Jumlah) AS total FROM keuangan");
+$query = mysqli_query($conn, "SELECT 
+    SUM(pemasukan) AS total_pemasukan,
+    SUM(pengeluaran) AS total_pengeluaran 
+    FROM keuangan");
+
 $data = mysqli_fetch_assoc($query);
-$totalSaldo = $data['total'];
-$saldo = number_format($totalSaldo, 2, ',', '.');
+$totalPemasukan = $data['total_pemasukan'];
+$totalPengeluaran = $data['total_pengeluaran'];
+$saldo = $totalPemasukan - $totalPengeluaran;
+$totalsaldo = number_format($saldo, 2, ',', '.');
+
 //kegiatan
 $kegiatanQuery = mysqli_query($conn, "SELECT nama, tanggal FROM kegiatan WHERE tanggal >= CURDATE() ORDER BY tanggal ASC LIMIT 1");
 if (mysqli_num_rows($kegiatanQuery) > 0) {
@@ -19,15 +26,15 @@ if (mysqli_num_rows($kegiatanQuery) > 0) {
 }
 
 // Data grafik
-$dataGrafik = mysqli_query($conn, "SELECT bulan, SUM(jumlah) as total FROM keuangan GROUP BY bulan ORDER BY FIELD(bulan, 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des')");
+// $dataGrafik = mysqli_query($conn, "SELECT waktu, SUM(total) as total FROM keuangan GROUP BY bulan ORDER BY FIELD(bulan, 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des')");
 
-$labels = [];
-$jumlah = [];
+// $labels = [];
+// $jumlah = [];
 
-while ($row = mysqli_fetch_assoc($dataGrafik)) {
-    $labels[] = $row['bulan'];
-    $jumlah[] = $row['total'];
-}
+// while ($row = mysqli_fetch_assoc($dataGrafik)) {
+//     $labels[] = $row['bulan'];
+//     $jumlah[] = $row['total'];
+// }
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -58,10 +65,10 @@ while ($row = mysqli_fetch_assoc($dataGrafik)) {
       <div class="col-2 border-end sidebarmenu  ">
         <div class="position-fixed ">           
         <nav class="nav flex-column text-dark mt-4">
-        <a href="dashboard.php" class="nav-link i"><i class="bi bi-house-fill me-2"></i>Beranda</a>
+        <a href="dashboard.php" class="nav-link text-primary "><i class="bi bi-house-fill me-2"></i>Beranda</a>
         <a href="anggota.php" class="nav-link"><i class="bi bi-people-fill me-2"></i>Data Anggota</a>
         <a href="kegiatan.php" class="nav-link"><i class="bi bi-calendar-event-fill me-2"></i>Kegiatan</a>
-        <a href="#" class="nav-link"><i class="bi bi-cash-stack me-2"></i>Keuangan</a>
+        <a href="keuangan.php" class="nav-link"><i class="bi bi-cash-stack me-2"></i>Keuangan</a>
         <a href="#" class="nav-link"><i class="bi bi-file-earmark-text-fill me-2"></i>Laporan Bulanan</a>
         </nav>
         </div>
@@ -81,7 +88,7 @@ while ($row = mysqli_fetch_assoc($dataGrafik)) {
           <div class="col-md-4">
             <div class="dashboard-box border border-3 border-primary-subtle">
               <h3>Jumlah Saldo</h3>
-              <h5 class="mt-2">Rp.<?= $saldo ?> </h5>
+              <h5 class="mt-2">Rp.<?= $totalsaldo ?> </h5>
             </div>
           </div>
           <div class="col-md-4">
