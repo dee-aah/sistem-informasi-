@@ -1,13 +1,32 @@
 <?php
 include "koneksi.php";
-//anggota
-$result = mysqli_query($conn, "SELECT * FROM kegiatan");
+
+$where = '';
+if (isset($_GET['filter'])) {
+  $filter = $_GET['filter'];
+  $today = date('Y-m-d');
+
+  if ($filter == 'hari_ini') {
+    $where = "WHERE DATE(tanggal) = '$today'";
+  } elseif ($filter == 'akan_datang') {
+    $where = "WHERE DATE(tanggal) > '$today'";
+  } elseif ($filter == 'selesai') {
+    $where = "WHERE DATE(tanggal) < '$today'";
+  }
+}
+
+// Jika ada pencarian nama
 $cari = isset($_GET['cari']) ? $_GET['cari'] : '';
 if ($cari != '') {
-  $result = mysqli_query($conn, "SELECT * FROM kegiatan WHERE nama LIKE '%$cari%'");
-} else {
-  $result = mysqli_query($conn, "SELECT * FROM kegiatan");
+  if ($where != '') {
+    $where .= " AND nama LIKE '%$cari%'";
+  } else {
+    $where = "WHERE nama LIKE '%$cari%'";
+  }
 }
+
+// Final query
+$result = mysqli_query($conn, "SELECT * FROM kegiatan $where ORDER BY tanggal ASC");
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -50,12 +69,14 @@ if ($cari != '') {
           <h3>Daftar Kegiatan Komunitas</h3> 
           <div class="mb-3 justify-content-between d-flex">
             <div class="me-2">
-              <select class="form-select">
-                <option selected>Pilih</option>
-                <option value="1">Semua</option>
-                <option value="2">Aktif</option>
-                <option value="3">Selesai</option>
-              </select>
+              <form method="get" id="filterForm" class="d-inline">
+                <select name="filter" class="form-select" onchange="document.getElementById('filterForm').submit()">
+                  <option value="">Semua</option>
+                  <option value="hari_ini" <?= isset($_GET['filter']) && $_GET['filter'] == 'hari_ini' ? 'selected' : '' ?>>Hari Ini</option>
+                  <option value="akan_datang" <?= isset($_GET['filter']) && $_GET['filter'] == 'akan_datang' ? 'selected' : '' ?>>Akan Datang</option>
+                  <option value="selesai" <?= isset($_GET['filter']) && $_GET['filter'] == 'selesai' ? 'selected' : '' ?>>Sudah Lewat</option>
+                </select>
+              </form>
             </div>
             <div class="d-flex gap-2"> 
               <a class="btn btn-success" id="btnPilih"><i class="bi bi-check-circle"></i> Pilih

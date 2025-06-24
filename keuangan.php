@@ -1,29 +1,64 @@
 <?php
 include "koneksi.php";
-//anggota
-$result = mysqli_query($conn, "SELECT * FROM keuangan");
+
+// Inisialisasi filter
+$where = '';
+if (isset($_GET['filter'])) {
+  $filter = $_GET['filter'];
+
+  if ($filter == 'bulan_ini') {
+    $bulan = date('m');
+    $tahun = date('Y');
+    $where = "WHERE MONTH(waktu) = $bulan AND YEAR(waktu) = $tahun";
+  } elseif ($filter == 'bulan_lalu') {
+    $bulan = date('m', strtotime('first day of last month'));
+    $tahun = date('Y', strtotime('first day of last month'));
+    $where = "WHERE MONTH(waktu) = $bulan AND YEAR(waktu) = $tahun";
+  } elseif ($filter == '1_tahun') {
+    $tahun_lalu = date('Y-m-d', strtotime('-1 year'));
+    $where = "WHERE waktu >= '$tahun_lalu'";
+  }
+}
+
+// Query utama menggunakan filter waktu
+$result = mysqli_query($conn, "SELECT * FROM keuangan $where ORDER BY waktu DESC");
+
+// Search berdasarkan nama (opsional, hanya kalau pakai kolom 'nama')
 $cari = isset($_GET['cari']) ? $_GET['cari'] : '';
 if ($cari != '') {
-  $result = mysqli_query($conn, "SELECT * FROM keuangan WHERE nama LIKE '%$cari%'");
-} else {
-  $result = mysqli_query($conn, "SELECT * FROM keuangan");
+  $result = mysqli_query($conn, "SELECT * FROM keuangan WHERE keterangan LIKE '%$cari%'");
 }
-// total pemasukan dan pengeluaran
-$query = mysqli_query($conn, "SELECT 
+
+// Tambah saldo
+if (isset($_POST['simpan'])) {
+  $waktu = $_POST['waktu'];
+  $keterangan = $_POST['keterangan'];
+  $pemasukan = $_POST['pemasukan'];
+  $pengeluaran = $_POST['pengeluaran'];
+
+  $query = mysqli_query($conn, "INSERT INTO keuangan (waktu, keterangan, pemasukan, pengeluaran)
+                                VALUES ('$waktu', '$keterangan', '$pemasukan', '$pengeluaran')");
+
+  if ($query) {
+    echo "<script>window.location.href='keuangan.php';</script>";
+  } else {
+    echo "<script>alert('Gagal menambahkan data');</script>";
+  }
+}
+
+// Total pemasukan & pengeluaran (tetap dari semua data, bukan hasil filter)
+$queryTotal = mysqli_query($conn, "SELECT 
     SUM(pemasukan) AS total_pemasukan,
     SUM(pengeluaran) AS total_pengeluaran 
-    FROM keuangan");
+    FROM keuangan $where");
 
-$data = mysqli_fetch_assoc($query);
-
-// Hitung saldo
+$data = mysqli_fetch_assoc($queryTotal);
 $totalPemasukan = $data['total_pemasukan'];
 $saldopemasukan = number_format($totalPemasukan, 2, ',', '.');
 $totalPengeluaran = $data['total_pengeluaran'];
 $saldopengeluaran = number_format($totalPengeluaran, 2, ',', '.');
 $saldo = $totalPemasukan - $totalPengeluaran;
 $totalsaldo = number_format($saldo, 2, ',', '.');
-
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -66,12 +101,14 @@ $totalsaldo = number_format($saldo, 2, ',', '.');
                     <h3 class="fw-bold">Data Keuangan</h3> 
                     <div class="row mt-3 mb-3">
                         <div class="col-2 align-items-center">
-                        <select class="form-select">
-                            <option selected>Pilih</option>
-                            <option value="1">Semua</option>
-                            <option value="2">Aktif</option>
-                            <option value="3">Selesai</option>
-                        </select>                                 
+                        <form method="get" id="filterForm" class="d-flex gap-2 mb-3">
+                            <select name="filter" class="form-select" onchange="document.getElementById('filterForm').submit()">
+                                <option value="">Pilih Waktu</option>
+                                <option value="bulan_ini" <?= isset($_GET['filter']) && $_GET['filter'] == 'bulan_ini' ? 'selected' : '' ?>>Bulan Ini</option>
+                                <option value="bulan_lalu" <?= isset($_GET['filter']) && $_GET['filter'] == 'bulan_lalu' ? 'selected' : '' ?>>Bulan Lalu</option>
+                                <option value="1_tahun" <?= isset($_GET['filter']) && $_GET['filter'] == '1_tahun' ? 'selected' : '' ?>>1 Tahun Terakhir</option>
+                            </select>
+                        </form>                                 
                         </div>
                         <div class="col-5 align-items-center ">
                             <p class=" align-items-center">Jumlah Saldo : Rp <strong><?=$totalsaldo?> </strong></p>
@@ -79,8 +116,8 @@ $totalsaldo = number_format($saldo, 2, ',', '.');
                         <div class="col justify-content-end d-flex"> 
                             <a class="btn btn-success pe-4 ps-4 me-3 " id="btnPilih"><i class="bi bi-check-circle pe-2"></i> Pilih
                             </a>
-                            <a class="btn btn-primary" href="tambahsaldo.php" role="button"><i class="bi bi-plus-circle"></i> Tambah Data
-                            </a>
+                            <a class="btn btn-primary" data-bs-target="#modalTambahKeuangan" data-bs-toggle="modal" href="tambahsaldo.php" role="button"><i class="bi bi-plus-circle"></i> Tambah Data
+                            </a> 
                         </div>
                     </div>
                     <div class="table-responsive text-center">
@@ -125,6 +162,42 @@ $totalsaldo = number_format($saldo, 2, ',', '.');
             </div>    
         </div>   
     </div>
+    <!-- Modal Tambah Data Keuangan -->
+<div class="modal fade" id="modalTambahKeuangan" tabindex="-1" aria-labelledby="modalTambahLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post" action="">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTambahLabel">Tambah Data Keuangan</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="waktu" class="form-label">Tanggal</label>
+            <input type="date" class="form-control" id="waktu" name="waktu" required>
+          </div>
+          <div class="mb-3">
+            <label for="keterangan" class="form-label">Keterangan</label>
+            <textarea class="form-control" id="keterangan" name="keterangan" rows="2" required></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="pemasukan" class="form-label">Pemasukan</label>
+            <input type="number" class="form-control" id="pemasukan" name="pemasukan" min="0" value="0">
+          </div>
+          <div class="mb-3">
+            <label for="pengeluaran" class="form-label">Pengeluaran</label>
+            <input type="number" class="form-control" id="pengeluaran" name="pengeluaran" min="0" value="0">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" name="simpan" class="btn btn-success">Simpan</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
     </main>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>

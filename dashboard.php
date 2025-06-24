@@ -35,6 +35,26 @@ if (mysqli_num_rows($kegiatanQuery) > 0) {
 //     $labels[] = $row['bulan'];
 //     $jumlah[] = $row['total'];
 // }
+$query = mysqli_query($conn, "
+  SELECT 
+    DATE_FORMAT(waktu, '%Y-%m') AS bulan, 
+    SUM(pemasukan) AS total_pemasukan, 
+    SUM(pengeluaran) AS total_pengeluaran 
+  FROM keuangan 
+  GROUP BY bulan 
+  ORDER BY bulan
+");
+
+$labels = [];
+$pemasukan = [];
+$pengeluaran = [];
+
+while ($row = mysqli_fetch_assoc($query)) {
+  $labels[] = $row['bulan'];
+  $pemasukan[] = $row['total_pemasukan'];
+  $pengeluaran[] = $row['total_pengeluaran'];
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -102,7 +122,7 @@ if (mysqli_num_rows($kegiatanQuery) > 0) {
           <div class="col-md-8">
             <div>
             <h3>Grafik Keuangan</h3>
-            <canvas id="grafikKeuangan"></canvas>
+            <canvas class="border border-4 border-primary-subtle mb-5" id="grafikKeuangan"></canvas>
             </div
           </div>
         </div>
@@ -114,41 +134,42 @@ if (mysqli_num_rows($kegiatanQuery) > 0) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  const ctx = document.getElementById('grafikKeuangan').getContext('2d');
-  const chart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: <?= json_encode($labels); ?>,
-      datasets: [{
-        label: 'Iuran Masuk (Rp)',
-        data: <?= json_encode($jumlah); ?>,
-        backgroundColor: 'rgba(13, 110, 253, 0.7)'
-      }]
+const ctx = document.getElementById('grafikKeuangan').getContext('2d');
+
+const data = {
+  labels: <?= json_encode($labels) ?>,
+  datasets: [
+    {
+      label: 'Pemasukan',
+      data: <?= json_encode($pemasukan) ?>,
+      backgroundColor: 'rgba(54, 162, 235, 0.6)',
+      borderColor: 'rgba(54, 162, 235, 1)',
+      borderWidth: 1
     },
-    options: {
-      responsive: true,
-      plugins: {
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              let value = context.raw.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-              return 'Rp. ' + value;
-            }
-          }
-        }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            callback: function(value) {
-              return 'Rp. ' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-            }
-          }
-        }
+    {
+      label: 'Pengeluaran',
+      data: <?= json_encode($pengeluaran) ?>,
+      backgroundColor: 'rgba(219, 12, 12, 0.6)',
+      borderColor: 'rgba(219, 12, 12, 0.6)',
+      borderWidth: 1
+    }
+  ]
+};
+
+const config = {
+  type: 'bar',
+  data: data,
+  options: {
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true
       }
     }
-  });
+  }
+};
+
+new Chart(ctx, config);
 </script>
 
 
