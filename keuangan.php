@@ -25,10 +25,13 @@ $result = mysqli_query($conn, "SELECT * FROM keuangan $where ORDER BY waktu DESC
 // Search data
 $cari = isset($_GET['cari']) ? $_GET['cari'] : '';
 if ($cari != '') {
-  $result = mysqli_query($conn, "SELECT * FROM keuangan WHERE keterangan LIKE '%$cari%'");
-} else {
-  $result = mysqli_query($conn, "SELECT * FROM keuangan");
+  if ($where != '') {
+    $where .= " AND keterangan LIKE '%$cari%'";
+  } else {
+    $where = "WHERE keterangan LIKE '%$cari%'";
+  }
 }
+$result = mysqli_query($conn, "SELECT * FROM keuangan $where ORDER BY waktu DESC");
 
 // Tambah saldo
 if (isset($_POST['simpan'])) {
@@ -39,7 +42,7 @@ if (isset($_POST['simpan'])) {
 
   $query = mysqli_query($conn, "INSERT INTO keuangan (waktu, keterangan, pemasukan, pengeluaran)
                                 VALUES ('$waktu', '$keterangan', '$pemasukan', '$pengeluaran')");
-
+  
   if ($query) {
     echo "<script>window.location.href='keuangan.php';</script>";
   } else {
@@ -54,11 +57,11 @@ $queryTotal = mysqli_query($conn, "SELECT
     FROM keuangan $where");
 
 $data = mysqli_fetch_assoc($queryTotal);
-$totalPemasukan = $data['total_pemasukan'];
-$saldopemasukan = number_format($totalPemasukan, 2, ',', '.');
-$totalPengeluaran = $data['total_pengeluaran'];
-$saldopengeluaran = number_format($totalPengeluaran, 2, ',', '.');
-$saldo = $totalPemasukan - $totalPengeluaran;
+$masuk = $data['total_pemasukan'];
+$totalPemasukan =number_format($masuk, 2, ',', '.');
+$keluar = $data['total_pengeluaran'];
+$totalPengeluaran =number_format($keluar, 2, ',', '.');
+$saldo = $masuk - $keluar;
 $totalsaldo = number_format($saldo, 2, ',', '.');
 //update data
 if (isset($_POST['update'])) {
@@ -121,7 +124,7 @@ if (isset($_GET['hapus'])) {
               <a href="anggota.php" class="nav-link"><i class="bi bi-people-fill me-2"></i>Data Anggota</a>
               <a href="kegiatan.php" class="nav-link"><i class="bi bi-calendar-event-fill me-2"></i>Kegiatan</a>
               <a href="keuangan.php" class="nav-link text-primary"><i class="bi bi-cash-stack me-2"></i>Keuangan</a>
-              <a href="#" class="nav-link"><i class="bi bi-file-earmark-text-fill me-2"></i>Laporan Bulanan</a>
+              <a href="laporan.php" class="nav-link"><i class="bi bi-file-earmark-text-fill me-2"></i>Laporan Bulanan</a>
             </nav>
           </div>
         </div>
@@ -174,8 +177,8 @@ if (isset($_GET['hapus'])) {
                       <td><?= $no++ ?></td>
                       <td><?= $row['waktu'] ?></td>
                       <td><?= $row['keterangan'] ?></td>
-                      <td><?= $row['pemasukan'] ?></td>
-                      <td><?= $row['pengeluaran'] ?></td>
+                      <td>Rp <?= $row['pemasukan'] ?></td>
+                      <td>Rp <?= $row['pengeluaran'] ?></td>
                       <td class="aksi-col d-none">
                         <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editModal<?= $row['id'] ?>">Edit</button>
                         <a href="keuangan.php?hapus=<?= $row['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus?')">Hapus</a>
@@ -217,13 +220,16 @@ if (isset($_GET['hapus'])) {
                       </div>
                     </div>
                   <?php endwhile; ?>
-                </tbody>
-              </table>  
-            </div>
-                  <div>
-                    <li>Total Pemasukan : Rp <?= $saldopemasukan ?></li>
-                    <li>Total Pengeluaran : Rp <?= $saldopengeluaran ?></li>
-                  </div>
+                  <tr>
+                    <th class="text-start ps-4" colspan="3">Total</th>
+                    <th>Rp <?= $totalPemasukan ?></th>
+                    <th>Rp <?= $totalPengeluaran ?></th>
+                  </tr>
+                  <tr>
+                    <th class="text-start ps-4" colspan="4">Jumlah Saldo</th>
+                    <th>Rp <?= $totalsaldo ?></th>
+                  </tr>
+                
                   <!-- Modal Tambah Data Keuangan -->
                   <div class="modal fade" id="modalTambahKeuangan" tabindex="-1" aria-labelledby="modalTambahLabel" aria-hidden="true">
                     <div class="modal-dialog">
