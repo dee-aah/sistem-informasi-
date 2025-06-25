@@ -4,7 +4,7 @@ body {
     background-color: #f1f3f5; }
 .sidebarmenu .nav-link {
     color: #1b1c1f;
-    font-weight: 500;
+
     }
 .sidebarmenu .nav-link:hover {
     background-color: #e0e7ff;
@@ -20,11 +20,10 @@ body {
 *{
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif ;
     }
-.title-blue {
+.das h2 {
+  font-size: 2rem;
+  font-weight: bold;
+  text-transform: uppercase;
     color: #003366;
-    font-size: 50px; /* biru tua seperti sidebar */
+    padding-top: 50px;
     }
-.i{
-    color: rgb(41, 41, 227);
-    text:blue;
-}

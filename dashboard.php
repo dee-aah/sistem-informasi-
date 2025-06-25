@@ -26,15 +26,6 @@ if (mysqli_num_rows($kegiatanQuery) > 0) {
 }
 
 // Data grafik
-// $dataGrafik = mysqli_query($conn, "SELECT waktu, SUM(total) as total FROM keuangan GROUP BY bulan ORDER BY FIELD(bulan, 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des')");
-
-// $labels = [];
-// $jumlah = [];
-
-// while ($row = mysqli_fetch_assoc($dataGrafik)) {
-//     $labels[] = $row['bulan'];
-//     $jumlah[] = $row['total'];
-// }
 $query = mysqli_query($conn, "
   SELECT 
     DATE_FORMAT(waktu, '%Y-%m') AS bulan, 
@@ -95,14 +86,14 @@ while ($row = mysqli_fetch_assoc($query)) {
       </div>
       <div class=" col-10 bg-light" >
         <div class="d-flex justify-content-between align-items-center mb-4">
-        <h5 class="title-blue pt-5 ">DASHBOARD</h5>
+        <h2 class="pt-5 font-monospace " style="font-weight: bold; font-size: 2rem; color: #003366;">DASHBOARD</h2>
         </div>
         <div class="row g-3 mb-3">
           <div class="col-md-4">
             <div class="dashboard-box border border-3 border-primary-subtle">
               <h3>Data Anggota</h3>
               <h5 class="mt-2"><?= $totalAnggota ?>  Orang</h5>
-              <p class="text-muted">Anggota aktif komunitas</p>
+              <p class="text-muted">Anggota Aktif</p>
             </div>
           </div>
           <div class="col-md-4">
@@ -121,7 +112,7 @@ while ($row = mysqli_fetch_assoc($query)) {
         <div class="row">
           <div class="col-md-8">
             <div>
-            <h3>Grafik Keuangan</h3>
+            <h2 class="pt-2 font-monospace pb-4" style="font-weight: bold; font-size: 2rem; color: #003366;">GRAFIK KEUANGAN</h2>
             <canvas class="border border-4 border-primary-subtle mb-5" id="grafikKeuangan"></canvas>
             </div
           </div>
